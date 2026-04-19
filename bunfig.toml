@@ -1,0 +1,21 @@
+# bunfig.toml — Bun test runtime configuration
+# Project: zomboid-cli
+# Phase 1 — cli-testing-foundation-v1
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Bun reads bunfig.toml automatically from the project root.
+# Bun's CLI: https://bun.sh/docs/runtime/bunfig
+# ─────────────────────────────────────────────────────────────────────────────
+
+[test]
+# Preload the global React/Bun test setup before every test file.
+# This ensures IS_REACT_ACT_ENVIRONMENT is set and act()/flushUpdates()
+# are available to all test files.
+preload = ["./tests/setup.ts"]
+
+# Default test file pattern (Bun default, documented for explicitness):
+testPattern = ["**/*.test.ts", "**/*.test.tsx"]
+
+# E2E subprocess tests — run in dedicated CI job via `bun test --filter e2e`.
+# E2E tests spawn the CLI as a subprocess and are gated in CI to run
+# on ubuntu-latest only (signal handling differs on Windows/macOS).
