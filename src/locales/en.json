@@ -7,6 +7,31 @@
     "global_settings": "Global Settings",
     "no_servers": "No servers yet."
   },
+  "sidebar": {
+    "main_menu": "Menu",
+    "server_config": "Server Config"
+  },
+  "main": {
+    "active_servers": "Active Servers",
+    "management": "Management",
+    "build": "Build",
+    "players": "RCON Config",
+    "stats": "Server Stats",
+    "basic": "Basic Settings",
+    "advanced": "Advanced Settings",
+    "admins": "Admin Management",
+    "scheduler": "Scheduler",
+    "backups": "Backups",
+    "global_settings": "Global Settings"
+  },
+  "footer": {
+    "enter_select": "[Enter] Select",
+    "esc_back": "[Esc] Back"
+  },
+  "context": {
+    "server_actions": "Server Actions",
+    "wizard_create": "Create New Server"
+  },
   "wizard": {
     "select_provider": "Select Cloud Provider",
     "auth_context": "Authentication & Project",

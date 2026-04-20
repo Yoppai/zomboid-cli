@@ -32,7 +32,10 @@
     "@cdktf/provider-google": "^16.12.1",
     "cdktf": "^0.21.0",
     "constructs": "^10.6.0",
+    "figures": "^6.1.0",
     "ink": "^7.0.0",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^4.0.0",
     "react": "^19.2.5",
     "ssh2": "^1.17.0",
     "zustand": "^5.0.12"

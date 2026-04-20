@@ -1,25 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { SelectList } from '@/presentation/components/SelectList.tsx';
 import { TextInput } from '@/presentation/components/TextInput.tsx';
 import { useRcon } from '@/presentation/hooks/use-rcon.ts';
+import { useServerPlayersPolling } from '@/presentation/hooks/use-server-players-polling.ts';
 import type { ServerRecord } from '@/domain/entities/server-record.ts';
 
 export interface PlayerManagementProps {
   readonly server: ServerRecord;
+  readonly isActive?: boolean;
+  readonly focused?: boolean;
 }
 
-export function PlayerManagement({ server }: PlayerManagementProps) {
+export function PlayerManagement({ server, isActive = false, focused = true }: PlayerManagementProps) {
   const rcon = useRcon();
   const [message, setMessage] = useState('');
   const [targetPlayer, setTargetPlayer] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'broadcast' | 'players'>('broadcast');
+  const [polledPlayerCount, setPolledPlayerCount] = useState(0);
+
+  useServerPlayersPolling(
+    server,
+    isActive && server.status === 'running',
+    useCallback((count) => setPolledPlayerCount(count), []),
+    10_000,
+  );
 
   useInput((_input, key) => {
+    if (focused === false) return;
     if (key.tab) {
       setActiveSection(prev => prev === 'broadcast' ? 'players' : 'broadcast');
     }
-  });
+  }, { isActive: focused !== false });
 
   useEffect(() => {
     if (server.status === 'running' && server.staticIp) {
@@ -54,6 +66,7 @@ export function PlayerManagement({ server }: PlayerManagementProps) {
             if (val === 'ban') await rcon.ban(targetPlayer);
             setTargetPlayer(null);
           }}
+          focused={focused}
         />
       </Box>
     );
@@ -74,22 +87,22 @@ export function PlayerManagement({ server }: PlayerManagementProps) {
               setMessage('');
             }
           }}
-          focused={activeSection === 'broadcast'}
+          focused={focused && activeSection === 'broadcast'}
         />
       </Box>
 
       <Box marginTop={1} flexDirection="column">
         <Text bold color={activeSection === 'players' ? 'cyan' : undefined}>
-          {activeSection === 'players' ? '❯ ' : '  '}Connected Players ({rcon.players.length})
+          {activeSection === 'players' ? '❯ ' : '  '}Connected Players ({isActive ? polledPlayerCount : rcon.players.length})
         </Text>
-        
+
         {rcon.players.length === 0 ? (
           <Text>No players online.</Text>
         ) : (
           <SelectList
             items={rcon.players.map(p => ({ label: p.username, value: p.username }))}
             onSelect={setTargetPlayer}
-            focused={activeSection === 'players'}
+            focused={focused && activeSection === 'players'}
           />
         )}
       </Box>

@@ -10,9 +10,10 @@ import type { MachineType } from '@/domain/entities/value-objects.ts';
 
 export interface ServerManagementProps {
   readonly server: ServerRecord;
+  readonly focused?: boolean;
 }
 
-export function ServerManagement({ server }: ServerManagementProps) {
+export function ServerManagement({ server, focused }: ServerManagementProps) {
   const { deploy, updateFlow, archive } = useServices();
   const [confirmAction, setConfirmAction] = useState<null | 'update' | 'archive' | 'change-instance'>(null);
   const [selectingInstance, setSelectingInstance] = useState(false);
@@ -81,12 +82,12 @@ export function ServerManagement({ server }: ServerManagementProps) {
       <Box flexDirection="column" gap={1}>
         <Text bold>Select Target Instance Type</Text>
       <SelectList
-        items={targetMachineTypes.map((machineType) => ({
+items={targetMachineTypes.map((machineType) => ({
           label: `${machineType.label} (${machineType.id})`,
           value: machineType.id,
         }))}
-
-          onSelect={(value) => {
+        focused={focused}
+        onSelect={(value) => {
             const selected = targetMachineTypes.find((machineType) => machineType.id === value) ?? null;
             setPendingMachineType(selected);
             setConfirmAction('change-instance');
@@ -139,7 +140,7 @@ export function ServerManagement({ server }: ServerManagementProps) {
       <Text>IP Address: {server.staticIp || 'N/A'}</Text>
       
       {actions.length > 0 ? (
-        <SelectList items={actions} onSelect={handleAction} />
+        <SelectList items={actions} onSelect={handleAction} focused={focused} />
       ) : (
         <Text>No actions available in current status.</Text>
       )}

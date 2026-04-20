@@ -7,6 +7,31 @@
     "global_settings": "Configuración Global",
     "no_servers": "No hay servidores aún."
   },
+  "sidebar": {
+    "main_menu": "Menú",
+    "server_config": "Config del Servidor"
+  },
+  "main": {
+    "active_servers": "Servidores Activos",
+    "management": "Gestión",
+    "build": "Versión",
+    "players": "Config RCON",
+    "stats": "Estadísticas del Servidor",
+    "basic": "Ajustes Básicos",
+    "advanced": "Ajustes Avanzados",
+    "admins": "Gestión de Administradores",
+    "scheduler": "Programador",
+    "backups": "Copias de Seguridad",
+    "global_settings": "Configuración Global"
+  },
+  "footer": {
+    "enter_select": "[Enter] Seleccionar",
+    "esc_back": "[Esc] Volver"
+  },
+  "context": {
+    "server_actions": "Acciones del Servidor",
+    "wizard_create": "Crear Nuevo Servidor"
+  },
   "wizard": {
     "select_provider": "Seleccionar Proveedor Cloud",
     "auth_context": "Autenticación & Proyecto",

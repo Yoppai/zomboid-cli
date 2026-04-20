@@ -7,14 +7,19 @@ export interface ConfirmDialogProps {
   readonly message: string;
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
+  /** When 'modal', rendered inside OverlayHost — shell input is gated by modalState */
+  readonly variant?: 'default' | 'modal';
 }
 
 // ── Component ──
 
-export function ConfirmDialog({ message, onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({ message, onConfirm, onCancel, variant = 'default' }: ConfirmDialogProps) {
   // Default selection is 1 = "No" (Cancel is default per spec)
   const [selected, setSelected] = useState(1);
 
+  // Modal variant: isActive=true captures input when rendered inside shell overlay
+  // The shell's own useInput is gated with isActive: modalState === 'closed'
+  // so shell input is already blocked when modalState !== 'closed'
   useInput((input, key) => {
     if (key.leftArrow || input === 'h') {
       setSelected(0); // Yes
@@ -33,7 +38,7 @@ export function ConfirmDialog({ message, onConfirm, onCancel }: ConfirmDialogPro
     } else if (key.escape) {
       onCancel();
     }
-  });
+  }, { isActive: true }); // Always active — shell useInput gates with modalState check
 
   const yesStyle = selected === 0
     ? { bold: true, color: 'red' as const }

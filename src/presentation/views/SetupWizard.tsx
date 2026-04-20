@@ -28,13 +28,14 @@ export function SetupWizard({ navigationStore, wizardStore }: SetupWizardProps) 
 
   useInput((input, key) => {
     if (key.escape || input === '\x1B') {
+      // Close wizard and return to previous context (not main/active-servers forced)
       if (process.env.NODE_ENV === 'test') {
         wizardStore.getState().reset();
-        navigationStore.getState().pop();
+        navigationStore.getState().popContext();
       } else {
         setTimeout(() => {
           wizardStore.getState().reset();
-          navigationStore.getState().pop();
+          navigationStore.getState().popContext();
         }, 0);
       }
     }

@@ -124,11 +124,10 @@ describe('GlobalSettings', () => {
     
     await new Promise((r) => setTimeout(r, 20));
     
-    // Verify: if focus worked, setSetting would be called with 'en'
-    // The test passes when Enter at least reaches the component (no crash).
-    // Full keyboard navigation (ArrowDown + Enter) requires focus manager init.
+    // Verify: Enter key now works (focus issue resolved)
+    // setSetting was called = SelectList keyboard capture works in tests too
     expect(localDbMock.getSetting).toHaveBeenCalled(); // useEffect ran
-    expect(localDbMock.setSetting).not.toHaveBeenCalled(); // focus issue
+    expect(localDbMock.setSetting).toHaveBeenCalledWith('locale', 'en'); // Enter works
     unmount();
   });
 });

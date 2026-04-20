@@ -20,10 +20,19 @@ export interface UiState {
   loadingMessage: string | null;
   error: AppError | null;
   confirmDialog: ConfirmDialogConfig | null;
+  // Shell overlay state
+  modalState: 'closed' | 'wizard' | 'confirm';
+  dimmed: boolean;
+  footerHints: readonly string[];
   setLoading: (loading: boolean, message?: string) => void;
   setError: (error: AppError | null) => void;
   showConfirm: (config: ConfirmDialogConfig) => void;
   clearConfirm: () => void;
+  openWizard: () => void;
+  closeWizard: () => void;
+  setDimmed: (dimmed: boolean) => void;
+  setFooterHints: (hints: readonly string[]) => void;
+  clearFooterHints: () => void;
 }
 
 export type UiStore = ReturnType<typeof createUiStore>;
@@ -36,6 +45,9 @@ export function createUiStore() {
     loadingMessage: null,
     error: null,
     confirmDialog: null,
+    modalState: 'closed',
+    dimmed: false,
+    footerHints: [],
 
     setLoading: (loading, message) =>
       set({
@@ -45,8 +57,18 @@ export function createUiStore() {
 
     setError: (error) => set({ error }),
 
-    showConfirm: (config) => set({ confirmDialog: config }),
+    showConfirm: (config) => set({ confirmDialog: config, modalState: 'confirm', dimmed: true }),
 
-    clearConfirm: () => set({ confirmDialog: null }),
+    clearConfirm: () => set({ confirmDialog: null, modalState: 'closed', dimmed: false }),
+
+    openWizard: () => set({ modalState: 'wizard', dimmed: true }),
+
+    closeWizard: () => set({ modalState: 'closed', dimmed: false }),
+
+    setDimmed: (dimmed) => set({ dimmed }),
+
+    setFooterHints: (hints) => set({ footerHints: hints }),
+
+    clearFooterHints: () => set({ footerHints: [] }),
   }));
 }

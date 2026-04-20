@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Text, useInput, useFocus } from 'ink';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Box, Text, useInput } from 'ink';
 
 // ── Types ──
 
@@ -14,6 +14,13 @@ export interface SelectListProps {
   readonly onSelect: (value: string) => void;
   readonly focusId?: string;
   readonly focused?: boolean;
+  /** Custom item renderer — receives (item, index, isSelected, isFocused, handleSelect) */
+  readonly renderItem?: (
+    item: SelectListItem,
+    index: number,
+    isSelected: boolean,
+    isFocused: boolean,
+  ) => React.ReactNode;
 }
 
 // ── Helpers ──
@@ -24,15 +31,31 @@ function findNextEnabled(items: readonly SelectListItem[], from: number, directi
     if (!items[idx]!.disabled) return idx;
     idx += direction;
   }
-  return from; // no enabled item found — stay put
+  return from;
+}
+
+// Default simple label renderer
+function defaultRenderItem(item: SelectListItem, index: number, isSelected: boolean, isFocused: boolean): React.ReactNode {
+  const indicator = isSelected ? '❯' : ' ';
+  return (
+    <Box key={`item-${index}`}>
+      <Text color={isSelected ? 'cyan' : undefined} bold={isSelected} dimColor={!isFocused}>
+        {indicator} {item.label}
+      </Text>
+    </Box>
+  );
 }
 
 // ── Component ──
 
-export function SelectList({ items, onSelect, focusId, focused }: SelectListProps) {
-  const { isFocused: inkFocused } = useFocus({ isActive: focusId !== undefined, id: focusId });
-  const isFocused = focused !== undefined ? focused : (focusId !== undefined ? inkFocused : true);
-  
+export function SelectList({ items, onSelect, focusId, focused, renderItem }: SelectListProps) {
+  // focused gates keyboard capture — three cases:
+  // 1. focused === undefined: always capture (backward compat for standalone/inline use)
+  // 2. focused === true: capture (shell main region active)
+  // 3. focused === false: no capture (shell sidebar focused, main should be inactive)
+  // focusId is kept for API compat but does NOT affect isFocused (useFocus removed)
+  const isFocused = focused !== undefined ? focused : true;
+
   const firstEnabled = items.findIndex((item) => !item.disabled);
   const initialIndex = firstEnabled >= 0 ? firstEnabled : 0;
 
@@ -48,7 +71,8 @@ export function SelectList({ items, onSelect, focusId, focused }: SelectListProp
     }
   }, [items.length]);
 
-  useInput((_input, key) => {
+  // Called inside useInput — safe because useInput is a hook (top-level)
+  const handleKeyDown = useCallback((_input: string, key: { upArrow?: boolean; downArrow?: boolean; return?: boolean }) => {
     if (!isFocused) return;
 
     if (key.downArrow) {
@@ -65,36 +89,19 @@ export function SelectList({ items, onSelect, focusId, focused }: SelectListProp
         onSelect(item.value);
       }
     }
-  });
+  }, [isFocused, items, onSelect]);
 
-  return React.createElement(
-    Box,
-    { flexDirection: 'column' },
-    ...items.map((item, i) => {
-      const isSelected = i === renderIndex;
-      const indicator = isSelected ? '❯' : ' ';
+  // useInput must be called unconditionally at top level — gating done via isFocused check inside handler
+  useInput(handleKeyDown);
 
-      if (item.disabled) {
-        return React.createElement(
-          Box,
-          { key: `item-${i}` },
-          React.createElement(Text, { dimColor: true }, `  ${item.label}`),
-        );
-      }
+  const itemRenderer = renderItem ?? defaultRenderItem;
 
-      return React.createElement(
-        Box,
-        { key: `item-${i}` },
-        React.createElement(
-          Text,
-          {
-            color: isSelected ? 'cyan' : undefined,
-            bold: isSelected,
-            dimColor: !isFocused,
-          },
-          `${indicator} ${item.label}`,
-        ),
-      );
-    }),
+  return (
+    <Box flexDirection="column">
+      {items.map((item, i) => {
+        const isSelected = i === renderIndex;
+        return itemRenderer(item, i, isSelected, isFocused);
+      })}
+    </Box>
   );
 }
