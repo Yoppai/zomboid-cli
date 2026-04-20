@@ -3,7 +3,6 @@ import { render } from 'ink';
 import { AppShell } from '@/presentation/views/AppShell.tsx';
 import { Router } from '@/presentation/views/Router.tsx';
 import { AppContextProvider } from '@/presentation/providers/AppContextProvider.tsx';
-import { createNavigationStore } from '@/presentation/store/navigation-store.ts';
 
 // Static CLI entrypoints — exit immediately without requiring a TTY
 const args = process.argv.slice(2);
@@ -33,13 +32,11 @@ if (unknownFlags.length > 0) {
   process.exit(1);
 }
 
-const navigationStore = createNavigationStore();
-
 function App() {
   return (
     <AppContextProvider>
       <AppShell>
-        <Router navigationStore={navigationStore} />
+        <Router />
       </AppShell>
     </AppContextProvider>
   );

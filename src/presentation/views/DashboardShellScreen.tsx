@@ -182,7 +182,7 @@ export function DashboardShellScreen({
       <ShellFooter hints={footerHints} />
       <OverlayHost dimmed={dimmed}>
         {modalState === 'wizard' && (
-          <SetupWizard navigationStore={navStore} wizardStore={wizardStore} />
+          <SetupWizard navStore={navStore} wizardStore={wizardStore} uiStore={uiStore} />
         )}
       </OverlayHost>
       {confirmDialog && (

@@ -5,6 +5,7 @@ import { Header } from '@/presentation/components/Header.tsx';
 import { KeyHint } from '@/presentation/components/KeyHint.tsx';
 import type { WizardStore } from '@/presentation/store/wizard-store.ts';
 import type { NavigationStore } from '@/presentation/store/navigation-store.ts';
+import type { UiStore } from '@/presentation/store/ui-store.ts';
 import { useServices } from '@/presentation/hooks/use-services.tsx';
 import { ProviderSelect } from './wizard-steps/ProviderSelect.tsx';
 import { AuthProject } from './wizard-steps/AuthProject.tsx';
@@ -18,25 +19,22 @@ import { generateSshKeyPair } from '@/infrastructure/ssh/ssh-utils.ts';
 
 
 export interface SetupWizardProps {
-  readonly navigationStore: NavigationStore;
+  readonly navStore: NavigationStore;
   readonly wizardStore: WizardStore;
+  readonly uiStore: UiStore;
 }
 
-export function SetupWizard({ navigationStore, wizardStore }: SetupWizardProps) {
+export function SetupWizard({ navStore, wizardStore, uiStore }: SetupWizardProps) {
   const step = useStore(wizardStore, (s) => s.step);
   const { cloudProvider, latency, deploy, localDb } = useServices();
 
   useInput((input, key) => {
     if (key.escape || input === '\x1B') {
-      // Close wizard and return to previous context (not main/active-servers forced)
+      // Reset wizard state. Shell closes the modal via DashboardShellScreen ESC handler.
       if (process.env.NODE_ENV === 'test') {
         wizardStore.getState().reset();
-        navigationStore.getState().popContext();
       } else {
-        setTimeout(() => {
-          wizardStore.getState().reset();
-          navigationStore.getState().popContext();
-        }, 0);
+        setTimeout(() => wizardStore.getState().reset(), 0);
       }
     }
   });
@@ -117,8 +115,11 @@ export function SetupWizard({ navigationStore, wizardStore }: SetupWizardProps) 
               rconPassword,
             });
 
-            navigationStore.getState().pop();
-            setTimeout(() => wizardStore.getState().reset(), 10);
+            navStore.getState().popContext();
+            setTimeout(() => {
+              wizardStore.getState().reset();
+              uiStore.getState().closeWizard();
+            }, 10);
           }}
         />}
       </Box>

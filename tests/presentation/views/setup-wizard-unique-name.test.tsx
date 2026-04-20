@@ -4,6 +4,7 @@ import { render } from 'ink-testing-library';
 import { SetupWizard } from '@/presentation/views/SetupWizard.tsx';
 import { createNavigationStore } from '@/presentation/store/navigation-store.ts';
 import { createWizardStore } from '@/presentation/store/wizard-store.ts';
+import { createUiStore } from '@/presentation/store/ui-store.ts';
 import { GCP_MACHINE_CATALOG } from '@/domain/entities/machine-catalog.ts';
 
 const deploySpy = vi.fn();
@@ -42,6 +43,7 @@ describe('SetupWizard server name uniqueness', () => {
 
     const wizardStore = createWizardStore();
     const navigationStore = createNavigationStore();
+    const uiStore = createUiStore();
     wizardStore.getState().setProvider('gcp');
     wizardStore.getState().setProject('project-1');
     wizardStore.getState().setRegion('us-east1', 'us-east1-b');
@@ -50,7 +52,7 @@ describe('SetupWizard server name uniqueness', () => {
     wizardStore.getState().setStep(5);
 
     const { stdin, lastFrame } = render(
-      <SetupWizard navigationStore={navigationStore} wizardStore={wizardStore} />,
+      <SetupWizard navStore={navigationStore} wizardStore={wizardStore} uiStore={uiStore} />,
     );
 
     act(() => {
@@ -71,6 +73,7 @@ describe('SetupWizard server name uniqueness', () => {
 
     const wizardStore = createWizardStore();
     const navigationStore = createNavigationStore();
+    const uiStore = createUiStore();
     wizardStore.getState().setProvider('gcp');
     wizardStore.getState().setProject('project-1');
     wizardStore.getState().setRegion('us-east1', 'us-east1-b');
@@ -79,7 +82,7 @@ describe('SetupWizard server name uniqueness', () => {
     wizardStore.getState().setStep(5);
 
     const { stdin } = render(
-      <SetupWizard navigationStore={navigationStore} wizardStore={wizardStore} />,
+      <SetupWizard navStore={navigationStore} wizardStore={wizardStore} uiStore={uiStore} />,
     );
 
     act(() => {

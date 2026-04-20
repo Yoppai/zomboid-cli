@@ -3,6 +3,7 @@ import React from 'react';
 import { SetupWizard } from '@/presentation/views/SetupWizard.tsx';
 import { createNavigationStore } from '@/presentation/store/navigation-store.ts';
 import { createWizardStore } from '@/presentation/store/wizard-store.ts';
+import { createUiStore } from '@/presentation/store/ui-store.ts';
 import { ServiceProvider } from '@/presentation/hooks/use-services.tsx';
 import { render } from 'ink-testing-library';
 
@@ -49,7 +50,7 @@ describe('Integration: Wizard Flow', () => {
 
     const { stdin, lastFrame, unmount } = render(
       <ServiceProvider services={servicesMock as any}>
-        <SetupWizard navigationStore={navStore} wizardStore={wizardStore} />
+        <SetupWizard navStore={navStore} wizardStore={wizardStore} uiStore={createUiStore()} />
       </ServiceProvider>,
     );
 
@@ -129,7 +130,7 @@ describe('Integration: Wizard Flow', () => {
 
     const { stdin, lastFrame, unmount } = render(
       <ServiceProvider services={servicesMock as any}>
-        <SetupWizard navigationStore={navStore} wizardStore={wizardStore} />
+        <SetupWizard navStore={navStore} wizardStore={wizardStore} uiStore={createUiStore()} />
       </ServiceProvider>,
     );
 

@@ -9,8 +9,7 @@ import { createUiStore } from '@/presentation/store/ui-store.ts';
 import { setRuntimeLocale, resetRuntimeLocale } from '@/presentation/hooks/use-translation.ts';
 import { createServerId } from '@/domain/entities/index.ts';
 
-// Enable DashboardShellScreen mount
-process.env.DASHBOARD_SHELL = '1';
+// Shell is now the only supported path — no feature flag needed.
 
 function createMockServices() {
   return {

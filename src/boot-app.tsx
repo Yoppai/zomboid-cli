@@ -20,7 +20,6 @@ import React from 'react';
 import { AppShell } from '@/presentation/views/AppShell.tsx';
 import { Router } from '@/presentation/views/Router.tsx';
 import { AppContextProvider } from '@/presentation/providers/AppContextProvider.tsx';
-import { createNavigationStore } from '@/presentation/store/navigation-store.ts';
 
 export interface CliBootDeps {
   /**
@@ -48,13 +47,11 @@ export interface CliBootDeps {
  * can await clean shutdown.
  */
 export function bootApp(deps: CliBootDeps): { waitUntilExit: () => Promise<void> } {
-  const navigationStore = createNavigationStore();
-
   function App() {
     return (
       <AppContextProvider>
         <AppShell>
-          <Router navigationStore={navigationStore} />
+          <Router />
         </AppShell>
       </AppContextProvider>
     );

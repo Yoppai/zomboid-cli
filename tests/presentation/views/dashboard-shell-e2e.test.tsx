@@ -10,8 +10,7 @@ import { createWizardStore } from '@/presentation/store/wizard-store.ts';
 import { resetRuntimeLocale } from '@/presentation/hooks/use-translation.ts';
 import { createServerId } from '@/domain/entities/index.ts';
 
-// Enable DashboardShellScreen mount
-process.env.DASHBOARD_SHELL = '1';
+// Shell is now the only supported path — no feature flag needed.
 
 // Helper: create server record with branded ID
 const TEST_SERVER_ID = createServerId('srv-shell-1');

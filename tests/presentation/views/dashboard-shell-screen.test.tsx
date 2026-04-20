@@ -7,8 +7,7 @@ import { createNavigationStore } from '@/presentation/store/navigation-store.ts'
 import { createServerStore } from '@/presentation/store/server-store.ts';
 import { createUiStore } from '@/presentation/store/ui-store.ts';
 
-// Enable DashboardShellScreen mount
-process.env.DASHBOARD_SHELL = '1';
+// Shell is now the only supported path — no feature flag needed.
 
 function createMockServices() {
   return {
