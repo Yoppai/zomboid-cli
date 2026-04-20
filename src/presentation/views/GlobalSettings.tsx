@@ -19,7 +19,7 @@ export interface GlobalSettingsProps {
 
 export function GlobalSettings({ navigationStore }: GlobalSettingsProps) {
   const t = useTranslation();
-  const { localDb } = useServices();
+  const { localDb, filePickerGateway } = useServices();
 
   const [locale, setLocale] = useState<Locale>('en');
   const [backupPath, setBackupPath] = useState<string>('~/.zomboid-cli/backups');
@@ -60,6 +60,18 @@ export function GlobalSettings({ navigationStore }: GlobalSettingsProps) {
     setEditBackup(false);
   };
 
+  const handlePickFolder = async () => {
+    const selectedPath = await filePickerGateway?.pickDirectory({
+      title: 'Select Backup Folder',
+      initialDir: backupPath.startsWith('~') ? undefined : backupPath,
+    });
+
+    if (selectedPath) {
+      setBackupPath(selectedPath);
+      localDb.setSetting('backup_path', selectedPath).catch(console.error);
+    }
+  };
+
   return (
     <Box flexDirection="column" gap={1}>
       <Header title={t('main_menu.global_settings')} />
@@ -87,15 +99,18 @@ export function GlobalSettings({ navigationStore }: GlobalSettingsProps) {
           <Text>{backupPath}</Text>
           <SelectList
             focusId="backup"
-            items={[{ label: 'Edit Backup Path', value: 'edit' }]}
-            onSelect={() => setEditBackup(true)}
-          />
+            items={[
+              { label: 'Select Backup Folder', value: 'pick' },
+              { label: 'Edit Backup Path', value: 'edit' },
+            ]}
+            onSelect={(value) => {
+              if (value === 'pick') {
+                void handlePickFolder();
+                return;
+              }
 
-          <Text bold>Backup Path</Text>
-          <Text>{backupPath}</Text>
-          <SelectList
-            items={[{ label: 'Edit Backup Path', value: 'edit' }]}
-            onSelect={() => setEditBackup(true)}
+              setEditBackup(true);
+            }}
           />
         </Box>
       )}

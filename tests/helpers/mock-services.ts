@@ -144,6 +144,7 @@ export function createMockServices(options: CreateMockServicesOptions = {}): Moc
 
   const filePicker = {
     pickFile: vi.fn().mockResolvedValue(null),
+    pickDirectory: vi.fn().mockResolvedValue(null),
     detectPlatform: vi.fn().mockReturnValue('unsupported'),
     ...options.repositories?.filePicker,
   };

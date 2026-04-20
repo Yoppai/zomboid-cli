@@ -20,6 +20,7 @@ export interface AppServices {
   readonly sftpGateway?: any;
   readonly cloudProvider?: any;
   readonly localDb?: any;
+  readonly filePickerGateway?: any;
 }
 
 // ── Context ──

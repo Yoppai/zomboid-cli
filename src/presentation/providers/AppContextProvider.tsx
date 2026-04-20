@@ -64,6 +64,7 @@ export function AppContextProvider({ children, contextFactory }: AppContextProvi
     sshGateway: context.repositories.sshGateway,
     cloudProvider: context.repositories.cloudProvider,
     localDb: context.repositories.localDb,
+    filePickerGateway: context.repositories.filePicker,
   };
 
 
