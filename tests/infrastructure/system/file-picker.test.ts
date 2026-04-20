@@ -211,4 +211,52 @@ describe('SystemFilePicker', () => {
       expect(args.some((a) => a.includes('*.ini') || a.includes('.ini'))).toBe(true);
     });
   });
+
+  describe('pickDirectory', () => {
+    it('spawns zenity directory picker with correct args on linux', async () => {
+      const spawnedCommands: string[][] = [];
+      const picker = new SystemFilePicker({
+        platform: 'linux',
+        whichFn: async (cmd) => (cmd === 'zenity' ? '/usr/bin/zenity' : null),
+        zenityAvailable: true,
+        spawnFn: async (cmd: string, args: string[]) => {
+          spawnedCommands.push([cmd, ...args]);
+          return { stdout: '/home/user/backups\n', exitCode: 0 };
+        },
+      });
+
+      const result = await picker.pickDirectory({ title: 'Select Backup Folder' });
+      expect(result).toBe('/home/user/backups');
+      expect(spawnedCommands[0]![0]).toBe('zenity');
+      expect(spawnedCommands[0]).toContain('--file-selection');
+      expect(spawnedCommands[0]).toContain('--directory');
+    });
+
+    it('spawns powershell folder browser on windows', async () => {
+      const spawnedCommands: string[][] = [];
+      const picker = new SystemFilePicker({
+        platform: 'win32',
+        whichFn: async () => null,
+        spawnFn: async (cmd: string, args: string[]) => {
+          spawnedCommands.push([cmd, ...args]);
+          return { stdout: 'C:\\Users\\me\\Backups\n', exitCode: 0 };
+        },
+      });
+
+      const result = await picker.pickDirectory();
+      expect(result).toBe('C:\\Users\\me\\Backups');
+      expect(spawnedCommands[0]![0]).toBe('powershell');
+      expect(spawnedCommands[0]!.join(' ')).toContain('FolderBrowserDialog');
+    });
+
+    it('returns null on unsupported platform', async () => {
+      const picker = new SystemFilePicker({
+        platform: 'freebsd' as NodeJS.Platform,
+        whichFn: async () => null,
+      });
+
+      const result = await picker.pickDirectory();
+      expect(result).toBeNull();
+    });
+  });
 });
