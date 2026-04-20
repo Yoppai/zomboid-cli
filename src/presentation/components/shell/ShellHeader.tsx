@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { TitledBox, titleStyles } from '@mishieck/ink-titled-box';
+import { TitledBox } from '@mishieck/ink-titled-box';
 
 export interface ShellHeaderProps {
   readonly version: string;

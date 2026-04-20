@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { TitledBox, titleStyles } from '@mishieck/ink-titled-box';
+import { TitledBox } from '@mishieck/ink-titled-box';
 import { useTranslation } from '@/presentation/hooks/use-translation.ts';
 import type { ShellContext } from '@/presentation/store/navigation-store.ts';
 

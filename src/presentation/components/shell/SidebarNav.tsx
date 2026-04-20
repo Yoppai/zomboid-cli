@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text, useWindowSize } from 'ink';
-import { TitledBox, titleStyles } from '@mishieck/ink-titled-box';
+import { TitledBox } from '@mishieck/ink-titled-box';
 import { useTranslation } from '@/presentation/hooks/use-translation.ts';
 import { SelectList } from '@/presentation/components/SelectList.tsx';
 import type { ShellContext, FocusRegion } from '@/presentation/store/navigation-store.ts';
@@ -47,7 +47,6 @@ function numberedRenderItem(
 ): React.ReactNode {
   const num = String(index + 1).padStart(2, ' ');
   const indicator = isSelected ? '▌' : ' ';
-  const dimmed = !isFocused;
 
   // Selected item: full cyan bar with white text for maximum contrast
   if (isSelected && isFocused) {

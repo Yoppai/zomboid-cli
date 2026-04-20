@@ -171,7 +171,6 @@ export function DashboardShellScreen({
         footerHints={footerHints}
         onSelect={handleSidebarSelect}
         onServerSelect={handleServerTabSelect}
-        onServerContextSelect={handleServerSelect}
       >
         {renderContent(context, navStore, serverStore, uiStore, handleServerSelect, focusRegion)}
       </ShellFrame>

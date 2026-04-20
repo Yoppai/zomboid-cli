@@ -5,7 +5,7 @@ import { ShellHeader } from '@/presentation/components/shell/ShellHeader.tsx';
 import { SidebarNav } from '@/presentation/components/shell/SidebarNav.tsx';
 import { ContentFrame } from '@/presentation/components/shell/ContentFrame.tsx';
 import { ShellFooter } from '@/presentation/components/shell/ShellFooter.tsx';
-import type { ShellContext, FocusRegion, ServerTabKey } from '@/presentation/store/navigation-store.ts';
+import type { ShellContext, FocusRegion } from '@/presentation/store/navigation-store.ts';
 
 export interface ShellFrameProps {
   readonly version: string;
@@ -16,7 +16,6 @@ export interface ShellFrameProps {
   readonly footerHints: readonly string[];
   readonly onSelect: (key: string) => void;
   readonly onServerSelect: (tab: string) => void;
-  readonly onServerContextSelect: (serverId: string) => void;
   readonly children: React.ReactNode;
 }
 
@@ -46,7 +45,6 @@ export function ShellFrame({
   footerHints,
   onSelect,
   onServerSelect,
-  onServerContextSelect,
   children,
 }: ShellFrameProps) {
   const { columns } = useWindowSize();
