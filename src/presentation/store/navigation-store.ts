@@ -24,6 +24,20 @@ export type ShellContext =
 
 export type FocusRegion = 'sidebar' | 'main' | 'modal';
 
+// ── Breakpoint Selector ───────────────────────────────────────────────────────
+
+export type ShellBreakpoint = 'narrow' | 'default' | 'wide';
+
+/**
+ * Determines shell layout breakpoint based on terminal column count.
+ * Used to drive responsive sidebar width and footer badge layout.
+ */
+export function getShellBreakpoint(columns: number): ShellBreakpoint {
+  if (columns < 90) return 'narrow';
+  if (columns < 120) return 'default';
+  return 'wide';
+}
+
 export interface NavigationState {
   // Shell context stack — starts with main/active-servers
   contextStack: readonly ShellContext[];

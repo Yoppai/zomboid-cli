@@ -9,6 +9,16 @@ export interface ShellFooterProps {
 // Narrow terminal (< 90 cols): collapse to 2 rows
 const NARROW_THRESHOLD = 90;
 
+/**
+ * ShellFooter — keyboard hints bar pinned at bottom of shell.
+ *
+ * Normal terminal (>= 90 cols): navigation badges on left, quit on right.
+ * Narrow terminal (< 90 cols): 2 rows — primary on first, Tab + Quit on second.
+ * Custom hints from store render alongside the right-side quit group.
+ *
+ * No border — badges use white/black keycap styling.
+ * Height budget contribution: 1-2 rows depending on breakpoint.
+ */
 export function ShellFooter({ hints = [] }: ShellFooterProps) {
   const { columns } = useWindowSize();
   const isNarrow = columns < NARROW_THRESHOLD;
@@ -19,56 +29,55 @@ export function ShellFooter({ hints = [] }: ShellFooterProps) {
       justifyContent="center"
       paddingX={2}
       paddingY={0}
-      borderStyle="double"
-      borderColor="cyan"
       gap={0}
     >
-      {/* Primary hints — always visible */}
+      {/* Primary row — badges spread across full width (space-between) */}
       <Box
         flexDirection="row"
-        justifyContent="flex-start"
+        justifyContent="space-between"
         alignItems="center"
         gap={isNarrow ? 2 : 3}
       >
-        <KeyBadge keys="↑↓" label="Move" />
-        <KeyBadge keys="Enter" label="Select" />
-        {columns >= NARROW_THRESHOLD && (
-          <>
+        {/* Left: core navigation badges */}
+        <Box flexDirection="row" gap={isNarrow ? 2 : 3}>
+          <KeyBadge keys="↑↓" label="Move" />
+          <KeyBadge keys="Enter" label="Select" />
+          {columns >= NARROW_THRESHOLD && (
+            <>
+              <KeyBadge keys="Esc" label="Back" />
+              <KeyBadge keys="Tab" label="Switch" />
+            </>
+          )}
+          {columns < NARROW_THRESHOLD && (
             <KeyBadge keys="Esc" label="Back" />
-            <KeyBadge keys="Tab" label="Switch" />
-          </>
-        )}
-        {columns < NARROW_THRESHOLD && (
-          <KeyBadge keys="Esc" label="Back" />
-        )}
-      </Box>
-
-      {/* Secondary hints (Tab) on narrow — below primary */}
-      {isNarrow && (
-        <Box flexDirection="row" alignItems="center" gap={2}>
-          <KeyBadge keys="Tab" label="Switch" />
+          )}
         </Box>
-      )}
 
-      {/* Right — custom hints from store */}
-      {hints.length > 0 && (
-        <Box gap={1} alignItems="center">
+        {/* Right: custom hints + quit */}
+        <Box flexDirection="row" gap={1} alignItems="center">
           {hints.map((hint, i) => (
             <Text key={i} dimColor italic>{hint}</Text>
           ))}
+          {!isNarrow && <KeyBadge keys="Q" label="Quit" />}
+        </Box>
+      </Box>
+
+      {/* Secondary row on narrow terminals */}
+      {isNarrow && (
+        <Box flexDirection="row" justifyContent="space-between" alignItems="center" gap={2}>
+          <KeyBadge keys="Tab" label="Switch" />
+          <KeyBadge keys="Q" label="Quit" />
         </Box>
       )}
     </Box>
   );
 }
 
-// Key badge: [KEY] label in compact terminal style
+// Key badge: white/black keycap style
 function KeyBadge({ keys, label }: { keys: string; label: string }) {
   return (
     <Box gap={0} alignItems="center">
-      <Text dimColor>[</Text>
-      <Text bold color="cyan">{keys}</Text>
-      <Text dimColor>]</Text>
+      <Text backgroundColor="white" color="black" bold>{`[${keys}]`}</Text>
       <Text dimColor> </Text>
       <Text dimColor>{label}</Text>
     </Box>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box, Text } from 'ink';
+import { TitledBox, titleStyles } from '@mishieck/ink-titled-box';
 import { useTranslation } from '@/presentation/hooks/use-translation.ts';
-import type { ShellContext, ServerTabKey } from '@/presentation/store/navigation-store.ts';
+import type { ShellContext } from '@/presentation/store/navigation-store.ts';
 
 export interface ContentFrameProps {
   readonly context: ShellContext;
@@ -36,38 +37,15 @@ export function ContentFrame({ context, children }: ContentFrameProps) {
   const titleKey = getTitleKey(context);
 
   return (
-    <Box flexDirection="column" flexGrow={1} paddingX={2} gap={0}>
-      {/* Content header bar — double-line top border with icon */}
-      <Box
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
-        paddingX={1}
-      >
-        {/* Left: icon + title */}
-        <Box gap={1} alignItems="center">
-          <Text bold color="cyan">▌</Text>
-          <Text bold color="white">{t(titleKey)}</Text>
-        </Box>
-        {/* Right: context info */}
-        <Box gap={2}>
-          {context.kind === 'server' && (
-            <Text dimColor italic>ID:{String(context.serverId).slice(0, 6)}</Text>
-          )}
-          <Text dimColor>|</Text>
-        </Box>
-      </Box>
-
-      {/* Main content area — double-line frame */}
-      <Box
-        flexGrow={1}
-        borderStyle="double"
-        borderColor="gray"
-        paddingX={1}
-        paddingY={0}
-      >
+    <TitledBox
+      borderStyle="round"
+      titles={[t(titleKey)]}
+      flexGrow={1}
+    >
+      {/* Main content area */}
+      <Box flexGrow={1} paddingX={1} paddingY={0}>
         {children}
       </Box>
-    </Box>
+    </TitledBox>
   );
 }

@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import { useSyncExternalStore } from 'react';
 import { ShellFrame } from '@/presentation/components/shell/ShellFrame.tsx';
-import { ShellHeader } from '@/presentation/components/shell/ShellHeader.tsx';
-import { SidebarNav } from '@/presentation/components/shell/SidebarNav.tsx';
-import { ContentFrame } from '@/presentation/components/shell/ContentFrame.tsx';
-import { ShellFooter } from '@/presentation/components/shell/ShellFooter.tsx';
 import { OverlayHost } from '@/presentation/components/shell/OverlayHost.tsx';
 import { createNavigationStore, type ShellContext, type ServerTabKey, type FocusRegion } from '@/presentation/store/navigation-store.ts';
 import type { ServerId } from '@/domain/entities/index.ts';
@@ -47,7 +43,6 @@ export function DashboardShellScreen({
   const serverStore = serverStoreProp ?? useMemo(() => createServerStore(), []);
   const uiStore = uiStoreProp ?? useMemo(() => createUiStore(), []);
   const wizardStore = wizardStoreProp ?? useMemo(() => createWizardStore(), []);
-  const { exit } = useApp();
   const { inventory } = useServices();
 
   // Subscribe to stores
@@ -166,20 +161,20 @@ export function DashboardShellScreen({
   const totalCount = servers.length;
 
   return (
-    <ShellFrame>
-      <ShellHeader version={VERSION} activeCount={activeCount} totalCount={totalCount} />
-      <Box flexGrow={1}>
-        <SidebarNav
-          context={context}
-          focusRegion={focusRegion}
-          onSelect={handleSidebarSelect}
-          onServerSelect={handleServerTabSelect}
-        />
-        <ContentFrame context={context}>
-          {renderContent(context, navStore, serverStore, uiStore, handleServerSelect, focusRegion)}
-        </ContentFrame>
-      </Box>
-      <ShellFooter hints={footerHints} />
+    <>
+      <ShellFrame
+        version={VERSION}
+        activeCount={activeCount}
+        totalCount={totalCount}
+        context={context}
+        focusRegion={focusRegion}
+        footerHints={footerHints}
+        onSelect={handleSidebarSelect}
+        onServerSelect={handleServerTabSelect}
+        onServerContextSelect={handleServerSelect}
+      >
+        {renderContent(context, navStore, serverStore, uiStore, handleServerSelect, focusRegion)}
+      </ShellFrame>
       <OverlayHost dimmed={dimmed}>
         {modalState === 'wizard' && (
           <SetupWizard navStore={navStore} wizardStore={wizardStore} uiStore={uiStore} />
@@ -193,7 +188,7 @@ export function DashboardShellScreen({
           variant="modal"
         />
       )}
-    </ShellFrame>
+    </>
   );
 }
 

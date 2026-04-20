@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
+import { TitledBox, titleStyles } from '@mishieck/ink-titled-box';
 
 export interface ShellHeaderProps {
   readonly version: string;
@@ -7,22 +8,26 @@ export interface ShellHeaderProps {
   readonly totalCount: number;
 }
 
+/**
+ * ShellHeader — single TitledBox with round border and embedded "System Status" title.
+ * Contains: CLI version, active servers count, total servers count.
+ * No uptime display.
+ */
 export function ShellHeader({ version, activeCount, totalCount }: ShellHeaderProps) {
   return (
-    <Box flexDirection="column" gap={0}>
-      {/* System Status bar — single-line horizontal strip, no box border */}
+    <TitledBox
+      borderStyle="round"
+      titles={['System Status']}
+    >
       <Box
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
-        paddingX={2}
+        paddingX={1}
         paddingY={0}
       >
         {/* Left: status label */}
         <Box gap={1} alignItems="center">
-          <Text bold color="cyan">[</Text>
-          <Text bold color="white">System Status</Text>
-          <Text bold color="cyan">]</Text>
           <Text dimColor>|</Text>
           <Text dimColor>Active:</Text>
           <Text bold color="green">{activeCount}</Text>
@@ -41,9 +46,6 @@ export function ShellHeader({ version, activeCount, totalCount }: ShellHeaderPro
           <Text dimColor>]</Text>
         </Box>
       </Box>
-
-      {/* Bottom separator — consistent double border */}
-      <Box borderStyle="double" borderColor="cyan" marginY={0} />
-    </Box>
+    </TitledBox>
   );
 }

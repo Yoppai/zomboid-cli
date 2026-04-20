@@ -1,8 +1,10 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useWindowSize } from 'ink';
+import { TitledBox, titleStyles } from '@mishieck/ink-titled-box';
 import { useTranslation } from '@/presentation/hooks/use-translation.ts';
 import { SelectList } from '@/presentation/components/SelectList.tsx';
 import type { ShellContext, FocusRegion } from '@/presentation/store/navigation-store.ts';
+import { getShellBreakpoint } from '@/presentation/store/navigation-store.ts';
 
 export interface SidebarNavProps {
   readonly context: ShellContext;
@@ -86,10 +88,26 @@ function numberedRenderItem(
 
 export function SidebarNav({ context, focusRegion, onSelect, onServerSelect }: SidebarNavProps) {
   const t = useTranslation();
+  const { columns } = useWindowSize();
 
   const isMain = context.kind === 'main';
   const titleKey = isMain ? 'sidebar.main_menu' : 'sidebar.server_config';
   const isFocused = focusRegion === 'sidebar';
+
+  const bp = getShellBreakpoint(columns);
+
+  // Responsive width strategy:
+  // - wide  (>=120): ~35% of columns, clamped 30-50
+  // - default (90-119): fixed 30
+  // - narrow (<90): compact 20
+  const sidebarWidth = (() => {
+    if (bp === 'wide') {
+      const raw = Math.floor(columns * 0.35);
+      return Math.max(30, Math.min(50, raw));
+    }
+    if (bp === 'narrow') return 20;
+    return 30; // default
+  })();
 
   const items = isMain
     ? MAIN_MENU_ITEMS.map((item) => ({
@@ -110,26 +128,11 @@ export function SidebarNav({ context, focusRegion, onSelect, onServerSelect }: S
   }
 
   return (
-    <Box
-      flexDirection="column"
-      gap={0}
-      width={30}
-      borderStyle="double"
-      borderColor={isFocused ? 'cyan' : 'gray'}
+    <TitledBox
+      borderStyle="round"
+      titles={[t(titleKey)]}
+      width={sidebarWidth}
     >
-      {/* Sidebar header bar — icon + title */}
-      <Box
-        flexDirection="row"
-        justifyContent="flex-start"
-        alignItems="center"
-        paddingX={1}
-        paddingY={0}
-      >
-        <Text bold color="cyan">▌</Text>
-        <Text bold color="white"> {t(titleKey)}</Text>
-      </Box>
-      <Text dimColor>├{'─'.repeat(27)}┤</Text>
-
       {/* Numbered item list with keyboard selection */}
       <SelectList
         items={items.map((item) => ({ label: item.label, value: item.value }))}
@@ -137,6 +140,6 @@ export function SidebarNav({ context, focusRegion, onSelect, onServerSelect }: S
         focused={isFocused}
         renderItem={numberedRenderItem as any}
       />
-    </Box>
+    </TitledBox>
   );
 }
