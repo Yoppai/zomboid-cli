@@ -8,29 +8,9 @@ import { createServerStore } from '@/presentation/store/server-store.ts';
 import { createUiStore } from '@/presentation/store/ui-store.ts';
 import { setRuntimeLocale, resetRuntimeLocale } from '@/presentation/hooks/use-translation.ts';
 import { createServerId } from '@/domain/entities/index.ts';
+import { createMockServices } from '@/tests/helpers/mock-services.ts';
 
 // Shell is now the only supported path — no feature flag needed.
-
-function createMockServices() {
-  return {
-    inventory: {
-      listActive: async () => [],
-      listArchived: async () => [],
-      getServer: async () => null,
-    },
-    cloudProvider: { verifyAuth: async () => true },
-    latency: { measureAllRegions: async () => [] },
-    deploy: { deploy: async () => ({}), startServer: async () => {}, stopServer: async () => {} },
-    rcon: { getOnlinePlayers: async () => [] },
-    stats: { getContainerStats: async () => null },
-    backup: {},
-    updateFlow: {},
-    scheduler: {},
-    archive: {},
-    localDb: { getSetting: async () => 'en', setSetting: async () => {} },
-    notificationStore: { addNotification: () => {} },
-  };
-}
 
 // Helper: simulate server list in store so navigation to server context works
 const TEST_SERVER_ID = createServerId('srv-1');
@@ -82,12 +62,24 @@ function hydrateSecondServer(serverStore: ReturnType<typeof createServerStore>) 
 }
 
 describe('DashboardShellScreen — Shell Regions Render', () => {
+  let mockServices: ReturnType<typeof createMockServices>;
+  let navStore: ReturnType<typeof createNavigationStore>;
+  let serverStore: ReturnType<typeof createServerStore>;
+  let uiStore: ReturnType<typeof createUiStore>;
+
+  beforeEach(() => {
+    mockServices = createMockServices();
+    navStore = createNavigationStore();
+    serverStore = createServerStore();
+    uiStore = createUiStore();
+  });
+
   afterEach(() => { resetRuntimeLocale(); });
 
   it('renders ZOMBOID-CLI fixed title', () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     // Shell renders with wide columns — HeroTitle uses BigText path
@@ -98,8 +90,8 @@ describe('DashboardShellScreen — Shell Regions Render', () => {
 
   it('renders ShellHeader with version', () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     expect(lastFrame()).toContain('CLI v0.1.0');
@@ -107,8 +99,8 @@ describe('DashboardShellScreen — Shell Regions Render', () => {
 
   it('renders sidebar with Menu title', () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     expect(lastFrame()).toContain('Menu');
@@ -116,8 +108,8 @@ describe('DashboardShellScreen — Shell Regions Render', () => {
 
   it('renders main content with Active Servers title', () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     expect(lastFrame()).toContain('Active Servers');
@@ -125,8 +117,8 @@ describe('DashboardShellScreen — Shell Regions Render', () => {
 
   it('renders footer with Enter and Esc hints', () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     expect(lastFrame()).toContain('Enter');
@@ -214,9 +206,15 @@ describe('DashboardShellScreen — Navigation Flow (store-driven)', () => {
 
 describe('DashboardShellScreen — Wizard Overlay Flow', () => {
   let uiStore: ReturnType<typeof createUiStore>;
+  let mockServices: ReturnType<typeof createMockServices>;
+  let navStore: ReturnType<typeof createNavigationStore>;
+  let serverStore: ReturnType<typeof createServerStore>;
 
   beforeEach(() => {
     uiStore = createUiStore();
+    mockServices = createMockServices();
+    navStore = createNavigationStore();
+    serverStore = createServerStore();
   });
 
   afterEach(() => { resetRuntimeLocale(); });
@@ -238,8 +236,8 @@ describe('DashboardShellScreen — Wizard Overlay Flow', () => {
 
   it('wizard overlay renders SetupWizard component when modalState=wizard', () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
 
@@ -310,13 +308,25 @@ describe('DashboardShellScreen — Confirm Dialog in Shell', () => {
 });
 
 describe('DashboardShellScreen — i18n Live Update', () => {
+  let mockServices: ReturnType<typeof createMockServices>;
+  let navStore: ReturnType<typeof createNavigationStore>;
+  let serverStore: ReturnType<typeof createServerStore>;
+  let uiStore: ReturnType<typeof createUiStore>;
+
+  beforeEach(() => {
+    mockServices = createMockServices();
+    navStore = createNavigationStore();
+    serverStore = createServerStore();
+    uiStore = createUiStore();
+  });
+
   afterEach(() => { resetRuntimeLocale(); });
 
   it('renders sidebar title from i18n (en locale)', () => {
     resetRuntimeLocale();
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     expect(lastFrame()).toContain('Menu');
@@ -324,8 +334,8 @@ describe('DashboardShellScreen — i18n Live Update', () => {
 
   it('updates UI when locale changes to Spanish', async () => {
     const { lastFrame } = render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
 
@@ -341,16 +351,28 @@ describe('DashboardShellScreen — i18n Live Update', () => {
 });
 
 describe('DashboardShellScreen — Responsive Column Collapse', () => {
+  let mockServices: ReturnType<typeof createMockServices>;
+  let navStore: ReturnType<typeof createNavigationStore>;
+  let serverStore: ReturnType<typeof createServerStore>;
+  let uiStore: ReturnType<typeof createUiStore>;
+
+  beforeEach(() => {
+    mockServices = createMockServices();
+    navStore = createNavigationStore();
+    serverStore = createServerStore();
+    uiStore = createUiStore();
+  });
+
   afterEach(() => { resetRuntimeLocale(); });
 
   it('empty server list shows empty state message (not column headers)', () => {
     const emptyServices = {
-      ...createMockServices(),
+      ...mockServices.services,
       inventory: { listActive: async () => [], listArchived: async () => [], getServer: async () => null },
     };
     const { lastFrame } = render(
       React.createElement(ServiceProvider, { services: emptyServices as any },
-        React.createElement(DashboardShellScreen, {}),
+        React.createElement(DashboardShellScreen, { navStore, serverStore, uiStore }),
       ),
     );
     // Empty state shows message, not column headers

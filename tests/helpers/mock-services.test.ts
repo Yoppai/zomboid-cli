@@ -1,14 +1,12 @@
 /**
  * Phase 2 Task 2.1 — tests/helpers/mock-services.test.ts
  *
- * RED: createMockServices() does not exist yet.
- * This test describes the expected factory API.
+ * Verifies the shared mock-services factory returns correct shape
+ * and that each vi.fn() method returns safe defaults.
  */
 import { expect, test, describe, vi, beforeEach } from 'bun:test';
 import { flushUpdates } from '../setup.ts';
-
-// Load the module under test — will fail until we create mock-services.ts
-const { createMockServices } = await import('./mock-services.ts');
+import { createMockServices } from '@/tests/helpers/mock-services.ts';
 
 describe('createMockServices', () => {
   test('returns an object with services and repositories keys', () => {

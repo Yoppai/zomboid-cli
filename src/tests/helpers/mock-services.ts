@@ -19,6 +19,7 @@ import type { UpdateFlowService } from '@/application/services/update-flow-servi
 import type { SchedulerService } from '@/application/services/scheduler-service.ts';
 import type { ArchiveService } from '@/application/services/archive-service.ts';
 import type { NotificationStore } from '@/presentation/store/notification-store.ts';
+import type { ContainerStats } from '@/domain/entities/value-objects.ts';
 
 export interface MockServices {
   services: {
@@ -35,8 +36,19 @@ export interface MockServices {
     };
     latency: Partial<LatencyService> & Record<string, ReturnType<typeof vi.fn>>;
     rcon: Partial<RconService> & Record<string, ReturnType<typeof vi.fn>>;
-    stats: Partial<StatsService> & Record<string, ReturnType<typeof vi.fn>>;
-    deploy: Partial<DeployService> & Record<string, ReturnType<typeof vi.fn>>;
+    stats: Partial<StatsService> & {
+      getStats: ReturnType<typeof vi.fn>;
+      getContainerStats: ReturnType<typeof vi.fn>;
+      getLogSnapshot: ReturnType<typeof vi.fn>;
+      getRecentLogs: ReturnType<typeof vi.fn>;
+      streamLogs: ReturnType<typeof vi.fn>;
+    };
+    deploy: Partial<DeployService> & {
+      deploy: ReturnType<typeof vi.fn>;
+      startServer: ReturnType<typeof vi.fn>;
+      stopServer: ReturnType<typeof vi.fn>;
+      changeInstanceType: ReturnType<typeof vi.fn>;
+    };
     backup: Partial<BackupService> & Record<string, ReturnType<typeof vi.fn>>;
     updateFlow: Partial<UpdateFlowService> & Record<string, ReturnType<typeof vi.fn>>;
     scheduler: Partial<SchedulerService> & Record<string, ReturnType<typeof vi.fn>>;
@@ -156,12 +168,19 @@ export function createMockServices(options: CreateMockServicesOptions = {}): Moc
 
   // ── Services ──────────────────────────────────────────────────────────────────
 
-  // notificationStore must be a real instance (or a mock) — use a simple object
+  // notificationStore is a zustand vanilla store — provide getState so code that
+  // calls store.getState() (e.g. notificationStore.getState()) works at runtime.
   const notificationStore = {
     notifications: [] as Array<{ id: string; type: string; message: string }>,
     addNotification: vi.fn(),
     removeNotification: vi.fn(),
     clear: vi.fn(),
+    getState: vi.fn().mockReturnValue({
+      notifications: [] as Array<{ id: string; type: string; message: string }>,
+      add: vi.fn(),
+      dismiss: vi.fn(),
+      clear: vi.fn(),
+    }),
   };
 
   const inventory = {
@@ -191,11 +210,18 @@ export function createMockServices(options: CreateMockServicesOptions = {}): Moc
 
   const stats = {
     getStats: vi.fn().mockResolvedValue({ cpuPercent: '0', memUsage: '0', memPercent: '0', netIO: '0', blockIO: '0', pids: 0 }),
+    getContainerStats: vi.fn().mockResolvedValue({ cpuPercent: '0', memUsage: '0/0', memPercent: '0', netIO: '0/0', blockIO: '0/0', pids: 0 } as ContainerStats),
+    getLogSnapshot: vi.fn().mockResolvedValue([]),
+    getRecentLogs: vi.fn().mockResolvedValue([]),
+    streamLogs: vi.fn().mockResolvedValue(undefined),
     ...options.stats,
   };
 
   const deploy = {
     deploy: vi.fn().mockResolvedValue({ staticIp: '', instanceZone: '', success: true }),
+    startServer: vi.fn().mockResolvedValue(undefined),
+    stopServer: vi.fn().mockResolvedValue(undefined),
+    changeInstanceType: vi.fn().mockResolvedValue(undefined),
     ...options.deploy,
   };
 

@@ -6,49 +6,33 @@ import { DashboardShellScreen } from '@/presentation/views/DashboardShellScreen.
 import { createNavigationStore } from '@/presentation/store/navigation-store.ts';
 import { createServerStore } from '@/presentation/store/server-store.ts';
 import { createUiStore } from '@/presentation/store/ui-store.ts';
+import { createMockServices } from '@/tests/helpers/mock-services.ts';
 
 // Shell is now the only supported path — no feature flag needed.
-
-function createMockServices() {
-  return {
-    inventory: {
-      listActive: async () => [],
-      listArchived: async () => [],
-      getServer: async () => null,
-    },
-    cloudProvider: { verifyAuth: async () => true },
-    latency: { measureAllRegions: async () => [] },
-    deploy: { deploy: async () => ({}), startServer: async () => {}, stopServer: async () => {} },
-    rcon: { getOnlinePlayers: async () => [] },
-    stats: { getContainerStats: async () => null },
-    backup: {},
-    updateFlow: {},
-    scheduler: {},
-    archive: {},
-    localDb: { getSetting: async () => 'en', setSetting: async () => {} },
-    notificationStore: { addNotification: () => {} },
-  };
-}
 
 describe('DashboardShellScreen', () => {
   let navStore: ReturnType<typeof createNavigationStore>;
   let serverStore: ReturnType<typeof createServerStore>;
   let uiStore: ReturnType<typeof createUiStore>;
+  let mockServices: ReturnType<typeof createMockServices>;
 
   function renderShell() {
     return render(
-      React.createElement(ServiceProvider, { services: createMockServices() as any },
-        React.createElement(DashboardShellScreen, {}),
+      React.createElement(ServiceProvider, { services: mockServices.services as any },
+        React.createElement(DashboardShellScreen, {
+          navStore,
+          serverStore,
+          uiStore,
+        }),
       ),
     );
   }
 
   beforeEach(() => {
-    // Stores are created inside DashboardShellScreen via useMemo
-    // We test by rendering the component and observing the output
     navStore = createNavigationStore();
     serverStore = createServerStore();
     uiStore = createUiStore();
+    mockServices = createMockServices();
   });
 
   // ── Shell Regions ────────────────────────────────────────────────
