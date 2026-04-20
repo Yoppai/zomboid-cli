@@ -9,9 +9,10 @@ import type { TaskType } from '@/domain/entities/enums.ts';
 
 export interface SchedulerPanelProps {
   readonly server: ServerRecord;
+  readonly focused?: boolean;
 }
 
-export function SchedulerPanel({ server }: SchedulerPanelProps) {
+export function SchedulerPanel({ server, focused = true }: SchedulerPanelProps) {
   const { scheduler } = useServices();
   const [tasks, setTasks] = useState<readonly ScheduledTask[]>([]);
   const [mode, setMode] = useState<'list' | 'create'>('list');
@@ -23,6 +24,7 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
   const maxFocus = newTaskType === 'broadcast' ? 3 : 2;
 
   useInput((_input, key) => {
+    if (focused === false) return;
     if (key.tab) {
       if (key.shift) {
         setFocusIndex(prev => (prev > 0 ? prev - 1 : maxFocus));
@@ -30,7 +32,7 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
         setFocusIndex(prev => (prev < maxFocus ? prev + 1 : 0));
       }
     }
-  });
+  }, { isActive: focused !== false });
 
   useEffect(() => {
     scheduler.listTasks(server.id).then(setTasks).catch(console.error);
@@ -57,16 +59,19 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
   };
 
   if (mode === 'create') {
+    // In create mode, only the field at focusIndex should capture input.
+    // effectiveFocused: true unless explicitly false (shell or standalone).
+    const effectiveFocused = focused !== false;
     return (
       <Box flexDirection="column" gap={1}>
         <Text bold>Create Scheduled Task (Tab to switch fields)</Text>
-        
+
         <Box flexDirection="column">
           <Text color={focusIndex === 0 ? 'cyan' : undefined}>
             {focusIndex === 0 ? '❯ ' : '  '}Task Type:
           </Text>
           <SelectList
-            focused={focusIndex === 0}
+            focused={effectiveFocused && focusIndex === 0}
             items={[
               { label: 'auto_backup' + (newTaskType === 'auto_backup' ? ' (Selected)' : ''), value: 'auto_backup' },
               { label: 'auto_restart' + (newTaskType === 'auto_restart' ? ' (Selected)' : ''), value: 'auto_restart' },
@@ -75,14 +80,14 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
             onSelect={(val) => setNewTaskType(val as TaskType)}
           />
         </Box>
-        
+
         <Box flexDirection="column">
           <Text color={focusIndex === 1 ? 'cyan' : undefined}>
             {focusIndex === 1 ? '❯ ' : '  '}Cron Expression:
           </Text>
           <TextInput focused={focusIndex === 1} label="(e.g. 0 4 * * *)" value={newCron} onChange={setNewCron} />
         </Box>
-        
+
         {newTaskType === 'broadcast' && (
           <Box flexDirection="column">
             <Text color={focusIndex === 2 ? 'cyan' : undefined}>
@@ -91,13 +96,13 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
             <TextInput focused={focusIndex === 2} label="Message" value={newPayload} onChange={setNewPayload} />
           </Box>
         )}
-        
+
         <Box flexDirection="column">
           <Text color={focusIndex === maxFocus ? 'cyan' : undefined}>
             {focusIndex === maxFocus ? '❯ ' : '  '}Actions:
           </Text>
           <SelectList
-            focused={focusIndex === maxFocus}
+            focused={effectiveFocused && focusIndex === maxFocus}
             items={[
               { label: 'Save Task', value: 'save' },
               { label: 'Cancel', value: 'cancel' }
@@ -115,7 +120,7 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
   return (
     <Box flexDirection="column" gap={1}>
       <Text bold>Scheduled Tasks</Text>
-      
+
       {tasks.length === 0 ? (
         <Text>No tasks scheduled.</Text>
       ) : (
@@ -130,7 +135,7 @@ export function SchedulerPanel({ server }: SchedulerPanelProps) {
 
       <Box marginTop={1}>
         <SelectList
-          focused={true}
+          focused={focused}
           items={[{ label: 'Create New Task', value: 'create' }]}
           onSelect={() => {
             setMode('create');

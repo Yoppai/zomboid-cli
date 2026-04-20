@@ -31,6 +31,8 @@ import { createWizardStore } from '@/presentation/store/wizard-store.ts';
 import type { WizardStore } from '@/presentation/store/wizard-store.ts';
 import { createNavigationStore } from '@/presentation/store/navigation-store.ts';
 import type { NavigationStore } from '@/presentation/store/navigation-store.ts';
+import { createUiStore } from '@/presentation/store/ui-store.ts';
+import type { UiStore } from '@/presentation/store/ui-store.ts';
 import { GCP_MACHINE_CATALOG } from '@/domain/entities/index.ts';
 import type { RegionLatency, GameBranch } from '@/domain/entities/index.ts';
 
@@ -39,17 +41,20 @@ import type { RegionLatency, GameBranch } from '@/domain/entities/index.ts';
 describe('SetupWizard', () => {
   let wizardStore: WizardStore;
   let navStore: NavigationStore;
+  let uiStore: UiStore;
 
   beforeEach(() => {
     wizardStore = createWizardStore();
     navStore = createNavigationStore();
+    uiStore = createUiStore();
   });
 
   it('should render Header with "Setup Wizard" title', async () => {
     const { lastFrame } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     expect(lastFrame()).toContain('Setup Wizard');
@@ -58,8 +63,9 @@ describe('SetupWizard', () => {
   it('should render step indicator "Step 1 of 5" by default', async () => {
     const { lastFrame } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     expect(lastFrame()).toContain('Step 1 of 5');
@@ -68,8 +74,9 @@ describe('SetupWizard', () => {
   it('should render ProviderSelect at step 1', async () => {
     const { lastFrame } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     // ProviderSelect shows GCP
@@ -79,8 +86,9 @@ describe('SetupWizard', () => {
   it('should render step 2 content when wizardStore.step changes to 2', async () => {
     const { lastFrame } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     act(() => {
@@ -93,8 +101,9 @@ describe('SetupWizard', () => {
     wizardStore.getState().setStep(3);
     const { lastFrame } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     expect(lastFrame()).toContain('Step 3 of 5');
@@ -103,19 +112,21 @@ describe('SetupWizard', () => {
   it('should show ESC Cancel key hint', async () => {
     const { lastFrame } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     expect(lastFrame()).toContain('ESC');
     expect(lastFrame()).toContain('Cancel');
   });
 
-  it('should call wizardStore.reset and navStore.pop on Escape', async () => {
+  it('should reset wizardStore state on Escape', async () => {
     const { stdin, unmount } = render(
       React.createElement(SetupWizard, {
-        navigationStore: navStore,
+        navStore: navStore,
         wizardStore,
+        uiStore,
       }),
     );
     // Set some state first so we can verify reset
@@ -130,10 +141,10 @@ describe('SetupWizard', () => {
       stdin.write('\x1B');
     });
     await sleep(20);
-    
+
     // Wait for useInput to process
     await new Promise((r) => setTimeout(r, 20));
-    
+
     expect(wizardStore.getState().step).toBe(1);
     expect(wizardStore.getState().provider).toBeNull();
     unmount();

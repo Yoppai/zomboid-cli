@@ -6,9 +6,10 @@ import { useServices } from '@/presentation/hooks/use-services.tsx';
 
 export interface BuildSelectProps {
   readonly server: ServerRecord;
+  readonly focused?: boolean;
 }
 
-export function BuildSelect({ server }: BuildSelectProps) {
+export function BuildSelect({ server, focused = false }: BuildSelectProps) {
   const { inventory } = useServices();
 
   const handleBranchSelect = async (val: string) => {
@@ -27,6 +28,7 @@ export function BuildSelect({ server }: BuildSelectProps) {
             { label: 'Outdated Unstable', value: 'outdatedunstable' },
           ]}
           onSelect={handleBranchSelect}
+          focused={focused}
         />
       </Box>
     </Box>

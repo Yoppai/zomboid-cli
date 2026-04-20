@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/ink-big-text": "^1.2.4",
     "@types/ink-testing-library": "^1.0.4",
     "@types/react": "^19.0.0",
     "@types/ssh2": "^1.15.5",
@@ -30,9 +31,13 @@
   },
   "dependencies": {
     "@cdktf/provider-google": "^16.12.1",
+    "@mishieck/ink-titled-box": "^0.4.2",
     "cdktf": "^0.21.0",
     "constructs": "^10.6.0",
+    "figures": "^6.1.0",
     "ink": "^7.0.0",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^4.0.0",
     "react": "^19.2.5",
     "ssh2": "^1.17.0",
     "zustand": "^5.0.12"

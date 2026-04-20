@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { useStats } from '@/presentation/hooks/use-stats.ts';
+import { useServerStatsPolling } from '@/presentation/hooks/use-server-stats-polling.ts';
 import { LogViewer } from '@/presentation/components/LogViewer.tsx';
 import { SelectList } from '@/presentation/components/SelectList.tsx';
+import type { ContainerStats } from '@/domain/entities/value-objects.ts';
 import type { ServerRecord } from '@/domain/entities/server-record.ts';
 import type { SshConnectionConfig } from '@/domain/entities/value-objects.ts';
 
 export interface ServerStatsProps {
   readonly server: ServerRecord;
+  readonly isActive?: boolean;
+  readonly focused?: boolean;
 }
 
-export function ServerStats({ server }: ServerStatsProps) {
+export function ServerStats({ server, isActive = false, focused = false }: ServerStatsProps) {
   const { containerStats, logs, fetchStats, fetchLogs } = useStats();
   const [mode, setMode] = useState<'stats' | 'logs'>('stats');
+  const [polledStats, setPolledStats] = useState<ContainerStats | null>(null);
+
+  useServerStatsPolling(
+    server,
+    isActive && server.status === 'running',
+    useCallback((stats) => setPolledStats(stats), []),
+    5_000,
+  );
 
   useEffect(() => {
     if (server.status === 'running' && server.staticIp) {
@@ -38,6 +50,7 @@ export function ServerStats({ server }: ServerStatsProps) {
         <SelectList
           items={[{ label: 'Back to Stats', value: 'back' }]}
           onSelect={() => setMode('stats')}
+          focused={focused}
         />
       </Box>
     );
@@ -48,13 +61,13 @@ export function ServerStats({ server }: ServerStatsProps) {
       <Text bold>Server Statistics</Text>
       
       <Box flexDirection="column" borderStyle="single" padding={1}>
-        {containerStats ? (
+        {(isActive && polledStats ? polledStats : containerStats) ? (
           <>
-            <Text>CPU Usage: {containerStats.cpuPercent}</Text>
-            <Text>Memory: {containerStats.memUsage} ({containerStats.memPercent})</Text>
-            <Text>Network I/O: {containerStats.netIO}</Text>
-            <Text>Block I/O: {containerStats.blockIO}</Text>
-            <Text>PIDs: {containerStats.pids}</Text>
+            <Text>CPU Usage: {(isActive && polledStats ? polledStats : containerStats)?.cpuPercent}</Text>
+            <Text>Memory: {(isActive && polledStats ? polledStats : containerStats)?.memUsage} ({(isActive && polledStats ? polledStats : containerStats)?.memPercent})</Text>
+            <Text>Network I/O: {(isActive && polledStats ? polledStats : containerStats)?.netIO}</Text>
+            <Text>Block I/O: {(isActive && polledStats ? polledStats : containerStats)?.blockIO}</Text>
+            <Text>PIDs: {(isActive && polledStats ? polledStats : containerStats)?.pids}</Text>
           </>
         ) : (
           <Text>Fetching stats...</Text>
@@ -78,6 +91,7 @@ export function ServerStats({ server }: ServerStatsProps) {
             setMode('logs');
           }
         }}
+        focused={focused}
       />
     </Box>
   );

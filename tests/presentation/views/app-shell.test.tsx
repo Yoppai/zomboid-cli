@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import React, { act } from 'react';
+import React from 'react';
 import { render } from 'ink-testing-library';
 
 import { AppShell } from '@/presentation/views/AppShell.tsx';
@@ -83,6 +83,8 @@ describe('AppShell', () => {
 });
 
 // ── Router ──
+// Router always renders DashboardShellScreen (persistent shell).
+// Legacy screen-stack routing tests have been removed.
 
 describe('Router', () => {
   let navStore: NavigationStore;
@@ -96,65 +98,28 @@ describe('Router', () => {
       React.createElement(
         ServiceProvider,
         { services: createMockServices() },
-        React.createElement(Router, { navigationStore: navStore }),
+        React.createElement(Router),
       ),
     );
   }
 
-  it('should render main menu view on main-menu screen', () => {
+  it('should render main menu view via shell', () => {
     const { lastFrame } = renderRouter();
     const frame = lastFrame();
     expect(frame).toContain('Create New Server');
   });
 
-  it('should render setup wizard view when navigated to wizard', () => {
-    navStore.getState().push('setup-wizard');
-    const { lastFrame } = renderRouter();
-    const frame = lastFrame();
-    expect(frame).toContain('Setup Wizard');
-  });
-
-  it('should render server dashboard view with serverId', async () => {
-    navStore.getState().push('server-dashboard', { serverId: 'srv-abc' });
-    const { lastFrame } = renderRouter();
-    await new Promise((r) => setTimeout(r, 20));
-    const frame = lastFrame();
-    expect(frame).toContain('Dashboard: Alpha');
-  });
-
-  it('should render archived servers view', () => {
-    navStore.getState().push('archived-servers');
+  it('should render archived servers view via shell', () => {
+    navStore.getState().pushContext({ kind: 'main', panel: 'archived' });
     const { lastFrame } = renderRouter();
     const frame = lastFrame();
     expect(frame).toContain('Archived Servers');
   });
 
-  it('should render settings view', () => {
-    navStore.getState().push('settings');
+  it('should render settings view via shell', () => {
+    navStore.getState().pushContext({ kind: 'main', panel: 'global-settings' });
     const { lastFrame } = renderRouter();
     const frame = lastFrame();
     expect(frame).toContain('Global Settings');
-  });
-
-  it('should update when navigation changes via store subscription', () => {
-    const { lastFrame } = renderRouter();
-    expect(lastFrame()).toContain('Create New Server');
-
-    // Push to wizard — act() flushes the React re-render triggered by useSyncExternalStore
-    act(() => {
-      navStore.getState().push('setup-wizard');
-    });
-    expect(lastFrame()).toContain('Setup Wizard');
-  });
-
-  it('should go back to previous screen on pop', () => {
-    navStore.getState().push('setup-wizard');
-    const { lastFrame } = renderRouter();
-    expect(lastFrame()).toContain('Setup Wizard');
-
-    act(() => {
-      navStore.getState().pop();
-    });
-    expect(lastFrame()).toContain('Create New Server');
   });
 });

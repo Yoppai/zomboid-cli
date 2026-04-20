@@ -7,9 +7,10 @@ import type { BackupMeta } from '@/domain/entities/value-objects.ts';
 
 export interface BackupsPanelProps {
   readonly server: ServerRecord;
+  readonly focused?: boolean;
 }
 
-export function BackupsPanel({ server }: BackupsPanelProps) {
+export function BackupsPanel({ server, focused = false }: BackupsPanelProps) {
   const { backup, notificationStore } = useServices();
   const [backups, setBackups] = useState<readonly BackupMeta[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,6 +60,7 @@ export function BackupsPanel({ server }: BackupsPanelProps) {
         <Box flexDirection="column" gap={1}>
           <Text>No backups found.</Text>
           <SelectList
+            focused={focused}
             items={[{ label: 'Create First Backup', value: 'create' }]}
             onSelect={() => handleCreate()}
           />
@@ -67,10 +69,11 @@ export function BackupsPanel({ server }: BackupsPanelProps) {
         <Box flexDirection="column" gap={1}>
           <Text dimColor>Select a backup to Restore or Create New:</Text>
           <SelectList
+            focused={focused}
             items={[
-              ...backups.map(b => ({ 
-                label: `Restore: ${b.filename} (${Math.round(b.sizeBytes / 1024 / 1024)}MB)`, 
-                value: b.filename 
+              ...backups.map(b => ({
+                label: `Restore: ${b.filename} (${Math.round(b.sizeBytes / 1024 / 1024)}MB)`,
+                value: b.filename
               })),
               { label: '--- Create New Backup ---', value: 'create' }
             ]}

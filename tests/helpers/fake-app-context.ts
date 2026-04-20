@@ -14,7 +14,7 @@
  *   await destroyFakeAppContext(ctx);
  */
 import { SqliteLocalDb } from '@/infrastructure/database/sqlite-local-db.ts';
-import { createMockServices, type MockServices } from './mock-services.ts';
+import { createMockServices, type MockServices } from '@/tests/helpers/mock-services.ts';
 
 export type FakeAppContext = {
   services: MockServices['services'];

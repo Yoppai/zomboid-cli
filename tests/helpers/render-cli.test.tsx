@@ -1,14 +1,14 @@
 /**
  * Phase 2 Task 2.3 — tests/helpers/render-cli.test.tsx
  *
- * RED: render-cli.tsx does not exist yet.
- * This test describes the expected renderCli() helper.
+ * Verifies the renderCli() test helper wraps ink-testing-library
+ * render with the ServiceProvider pattern.
  */
 import React from 'react';
 import { Text } from 'ink';
 import { expect, test, describe, vi } from 'bun:test';
 import { flushUpdates } from '../setup.ts';
-import { createMockServices } from './mock-services.ts';
+import { createMockServices } from '@/tests/helpers/mock-services.ts';
 
 const { renderCli } = await import('./render-cli.tsx');
 

@@ -12,10 +12,11 @@ export interface FilePickerButtonProps {
 
 // ── Component ──
 
-export function FilePickerButton({ label, selectedFile }: FilePickerButtonProps) {
+export function FilePickerButton({ label, onSelect, selectedFile }: FilePickerButtonProps) {
   const displayName = selectedFile
     ? path.basename(selectedFile)
     : 'No file selected';
+  void onSelect;
 
   return React.createElement(
     Box,
