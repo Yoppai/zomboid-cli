@@ -1,0 +1,111 @@
+import React, { useEffect, useState, useCallback } from 'react';
+import { Box, Text, useInput } from 'ink';
+import { SelectList } from '@/shared/components/common/SelectList.tsx';
+import { TextInput } from '@/shared/components/common/TextInput.tsx';
+import { useRcon } from '@/features/server-dashboard/hooks/use-rcon';
+import { useServerPlayersPolling } from '@/features/server-dashboard/hooks/use-server-players-polling';
+import type { ServerRecord } from '@/shared/infra/entities/server-record.ts';
+
+export interface PlayerManagementProps {
+  readonly server: ServerRecord;
+  readonly isActive?: boolean;
+  readonly focused?: boolean;
+}
+
+export function PlayerManagement({ server, isActive = false, focused = true }: PlayerManagementProps) {
+  const rcon = useRcon();
+  const [message, setMessage] = useState('');
+  const [targetPlayer, setTargetPlayer] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<'broadcast' | 'players'>('broadcast');
+  const [polledPlayerCount, setPolledPlayerCount] = useState(0);
+
+  useServerPlayersPolling(
+    server,
+    isActive && server.status === 'running',
+    useCallback((count) => setPolledPlayerCount(count), []),
+    10_000,
+  );
+
+  useInput((_input, key) => {
+    if (focused === false) return;
+    if (key.tab) {
+      setActiveSection(prev => prev === 'broadcast' ? 'players' : 'broadcast');
+    }
+  }, { isActive: focused !== false });
+
+  useEffect(() => {
+    if (server.status === 'running' && server.staticIp) {
+      rcon.connect({
+        host: server.staticIp,
+        port: 22,
+        username: 'zomboid',
+        privateKey: server.sshPrivateKey,
+      }, server.rconPassword).then(() => rcon.getPlayers()).catch(console.error);
+    }
+    return () => {
+      rcon.disconnect().catch(console.error);
+    };
+  }, [server.status]);
+
+  if (!rcon.connected) {
+    return <Text>Connecting to RCON...</Text>;
+  }
+
+  if (targetPlayer) {
+    return (
+      <Box flexDirection="column" gap={1}>
+        <Text bold>Action for: {targetPlayer}</Text>
+        <SelectList
+          items={[
+            { label: 'Kick', value: 'kick' },
+            { label: 'Ban', value: 'ban' },
+            { label: 'Cancel', value: 'cancel' }
+          ]}
+          onSelect={async (val) => {
+            if (val === 'kick') await rcon.kick(targetPlayer);
+            if (val === 'ban') await rcon.ban(targetPlayer);
+            setTargetPlayer(null);
+          }}
+          focused={focused}
+        />
+      </Box>
+    );
+  }
+
+  return (
+    <Box flexDirection="column" gap={1}>
+      <Box flexDirection="column">
+        <Text bold color={activeSection === 'broadcast' ? 'cyan' : undefined}>
+          {activeSection === 'broadcast' ? '❯ ' : '  '}Broadcast Message
+        </Text>
+        <TextInput
+          value={message}
+          onChange={setMessage}
+          onSubmit={async (val) => {
+            if (val.trim()) {
+              await rcon.broadcast(val);
+              setMessage('');
+            }
+          }}
+          focused={focused && activeSection === 'broadcast'}
+        />
+      </Box>
+
+      <Box marginTop={1} flexDirection="column">
+        <Text bold color={activeSection === 'players' ? 'cyan' : undefined}>
+          {activeSection === 'players' ? '❯ ' : '  '}Connected Players ({isActive ? polledPlayerCount : rcon.players.length})
+        </Text>
+
+        {rcon.players.length === 0 ? (
+          <Text>No players online.</Text>
+        ) : (
+          <SelectList
+            items={rcon.players.map(p => ({ label: p.username, value: p.username }))}
+            onSelect={setTargetPlayer}
+            focused={focused && activeSection === 'players'}
+          />
+        )}
+      </Box>
+    </Box>
+  );
+}
