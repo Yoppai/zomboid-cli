@@ -11,7 +11,7 @@
 # Preload the global React/Bun test setup before every test file.
 # This ensures IS_REACT_ACT_ENVIRONMENT is set and act()/flushUpdates()
 # are available to all test files.
-preload = ["./tests/setup.ts"]
+preload = ["./src/tests/setup.ts"]
 
 # Default test file pattern (Bun default, documented for explicitness):
 testPattern = ["**/*.test.ts", "**/*.test.tsx"]
