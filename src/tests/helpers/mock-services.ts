@@ -8,18 +8,18 @@
  * real SqliteLocalDb, SSH pools, or cloud credentials.
  */
 import { vi } from 'bun:test';
-import type { ILocalDb, ISshGateway, ISftpGateway, IRconGateway, ICloudProvider, IFilePickerGateway } from '@/domain/repositories/index.ts';
-import type { InventoryService } from '@/application/services/inventory-service.ts';
-import type { LatencyService } from '@/application/services/latency-service.ts';
-import type { RconService } from '@/application/services/rcon-service.ts';
-import type { StatsService } from '@/application/services/stats-service.ts';
-import type { DeployService } from '@/application/services/deploy-service.ts';
-import type { BackupService } from '@/application/services/backup-service.ts';
-import type { UpdateFlowService } from '@/application/services/update-flow-service.ts';
-import type { SchedulerService } from '@/application/services/scheduler-service.ts';
-import type { ArchiveService } from '@/application/services/archive-service.ts';
-import type { NotificationStore } from '@/presentation/store/notification-store.ts';
-import type { ContainerStats } from '@/domain/entities/value-objects.ts';
+import type { ILocalDb, ISshGateway, ISftpGateway, IRconGateway, ICloudProvider, IFilePickerGateway } from '@/shared/infra/contracts/index.ts';
+import type { InventoryService } from '@/features/server-dashboard/services/inventory-service';
+import type { LatencyService } from '@/features/server-dashboard/services/latency-service';
+import type { RconService } from '@/features/server-dashboard/services/rcon-service';
+import type { StatsService } from '@/features/server-dashboard/services/stats-service';
+import type { DeployService } from '@/features/server-deploy/services/deploy-service.ts';
+import type { BackupService } from '@/features/backups/services/backup-service.ts';
+import type { UpdateFlowService } from '@/features/server-deploy/services/update-flow-service.ts';
+import type { SchedulerService } from '@/features/scheduler/services/scheduler-service.ts';
+import type { ArchiveService } from '@/features/archive/services/archive-service.ts';
+import type { NotificationStore } from '@/shared/infra/notification-store.ts';
+import type { ContainerStats } from '@/shared/infra/entities/value-objects.ts';
 
 export interface MockServices {
   services: {
